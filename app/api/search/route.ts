@@ -16,11 +16,16 @@ export async function POST(request: Request) {
   try {
     const availability = await searchAvailability(parsed.data);
     const ranked = rankResults(availability, parsed.data);
+    const results = ranked.map((result) => {
+      const publicResult: Partial<typeof result> = { ...result };
+      delete publicResult.rawPayload;
+      return publicResult;
+    });
     return NextResponse.json({
       source: parsed.data.source,
-      resultCount: ranked.length,
+      resultCount: results.length,
       fetchedAt: new Date().toISOString(),
-      results: ranked
+      results
     });
   } catch (error) {
     if (error instanceof SeatsAeroError) {
