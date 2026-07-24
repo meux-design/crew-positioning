@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-surface-page: #F1F3F5;
+  --color-surface-raised: #FFFFFF;
+  --color-text-primary: #16191C;
+  --color-text-secondary: #5A6169;
+  --color-action-primary: #B8541F;
+  --color-action-primary-hover: #D46A2E;
+  --color-border-interactive: #5A6169;
+  --color-border-decorative: #CBD1D7;
+  --color-focus-ring: #B8541F;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--color-surface-page);
+  color: var(--color-text-primary);
+  font-size: 16px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.input {
+  min-height: 44px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid var(--color-border-interactive);
+  background: var(--color-surface-raised);
+  padding: 0.5rem 0.75rem;
+}
+
+.icon-button {
+  display: inline-grid;
+  min-height: 44px;
+  min-width: 44px;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-interactive);
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+}
+
+.small-button {
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-interactive);
+  padding: 0 0.75rem;
+  font-size: 14px;
+  font-weight: 600;
+}

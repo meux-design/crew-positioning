@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  displayName  String
+  homeBaseIata String
+  createdAt    DateTime      @default(now())
+  savedSearches SavedSearch[]
+}
+
+model SavedSearch {
+  id              String   @id @default(cuid())
+  userId          String
+  originIata      String
+  destinationIata String
+  departAfter     DateTime
+  arriveBefore    DateTime
+  cabin           Cabin
+  seatCount       Int
+  label           String
+  createdAt       DateTime @default(now())
+  lastRunAt       DateTime?
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  runs            SearchRun[]
+}
+
+model SearchRun {
+  id             String         @id @default(cuid())
+  savedSearchId  String?
+  requestPayload Json
+  resultCount    Int
+  ranAt          DateTime       @default(now())
+  source         SearchSource
+  savedSearch    SavedSearch?   @relation(fields: [savedSearchId], references: [id], onDelete: SetNull)
+  cachedResults  CachedResult[]
+}
+
+model CachedResult {
+  id             String    @id @default(cuid())
+  searchRunId    String
+  program        String
+  carrier        String
+  flightNumber   String
+  departsAt      DateTime
+  arrivesAt      DateTime
+  cabin          Cabin
+  mileageCost    Int
+  taxesCents     Int
+  seatsRemaining Int
+  rawPayload     Json
+  searchRun      SearchRun @relation(fields: [searchRunId], references: [id], onDelete: Cascade)
+}
+
+enum Cabin {
+  economy
+  premium
+  business
+  first
+}
+
+enum SearchSource {
+  CACHED
+  LIVE
+}
