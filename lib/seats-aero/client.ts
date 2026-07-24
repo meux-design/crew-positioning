@@ -15,6 +15,21 @@ export class SeatsAeroError extends Error {
   }
 }
 
+const availabilityTripSchema = z.object({
+  ID: z.string().optional(),
+  Source: z.string().optional(),
+  Carriers: z.string().optional(),
+  FlightNumbers: z.string().optional(),
+  OriginAirport: z.string().optional(),
+  DestinationAirport: z.string().optional(),
+  DepartsAt: z.string().optional(),
+  ArrivesAt: z.string().optional(),
+  Cabin: z.string().optional(),
+  MileageCost: z.number().optional(),
+  TotalTaxes: z.number().optional(),
+  RemainingSeats: z.number().optional()
+}).passthrough();
+
 const availabilitySchema = z.object({
   ID: z.string().optional(),
   Source: z.string().optional(),
@@ -27,7 +42,13 @@ const availabilitySchema = z.object({
   Cabin: z.string().optional(),
   MileageCost: z.number().optional(),
   TotalTaxes: z.number().optional(),
-  SeatsRemaining: z.number().optional()
+  SeatsRemaining: z.number().optional(),
+  AvailabilityTrips: z.array(availabilityTripSchema).optional(),
+  Route: z.object({
+    OriginAirport: z.string().optional(),
+    DestinationAirport: z.string().optional(),
+    Source: z.string().optional()
+  }).passthrough().optional()
 }).passthrough();
 
 const searchResponseSchema = z.object({
@@ -55,7 +76,30 @@ function normalizeResults(payload: unknown, request: SearchRequest): Availabilit
   const rows = parsed.data.data ?? parsed.data.Data ?? [];
   const fetchedAt = new Date().toISOString();
 
-  return rows.flatMap((row, index) => {
+  return rows.flatMap((row, index): AvailabilityResult[] => {
+    if (row.AvailabilityTrips?.length) {
+      return row.AvailabilityTrips
+        .filter((trip) => trip.DepartsAt && trip.ArrivesAt)
+        .filter((trip) => (trip.RemainingSeats ?? request.seatCount) >= request.seatCount)
+        .map((trip, tripIndex) => ({
+          id: trip.ID ?? `${row.ID ?? "seats-aero"}-${tripIndex}`,
+          program: trip.Source ?? row.Source ?? row.Route?.Source ?? "Unknown program",
+          carrier: trip.Carriers ?? row.Airline ?? "Unknown",
+          flightNumber: trip.FlightNumbers ?? row.FlightNumber ?? "TBA",
+          originIata: trip.OriginAirport ?? row.Route?.OriginAirport ?? request.originIata,
+          destinationIata: trip.DestinationAirport ?? row.Route?.DestinationAirport ?? request.destinationIata,
+          departsAt: new Date(trip.DepartsAt!).toISOString(),
+          arrivesAt: new Date(trip.ArrivesAt!).toISOString(),
+          cabin: normalizeCabin(trip.Cabin, request.cabin),
+          mileageCost: trip.MileageCost ?? row.MileageCost ?? 0,
+          taxesCents: trip.TotalTaxes ?? row.TotalTaxes ?? 0,
+          seatsRemaining: trip.RemainingSeats ?? request.seatCount,
+          source: request.source,
+          fetchedAt,
+          rawPayload: { availability: row, trip }
+        }));
+    }
+
     if (!row.ArrivalTime || !row.DepartureTime) return [];
     return [{
       id: row.ID ?? `seats-aero-${index}`,
@@ -68,7 +112,7 @@ function normalizeResults(payload: unknown, request: SearchRequest): Availabilit
       arrivesAt: new Date(row.ArrivalTime).toISOString(),
       cabin: normalizeCabin(row.Cabin, request.cabin),
       mileageCost: row.MileageCost ?? 0,
-      taxesCents: Math.round((row.TotalTaxes ?? 0) * 100),
+      taxesCents: row.TotalTaxes ?? 0,
       seatsRemaining: row.SeatsRemaining ?? request.seatCount,
       source: request.source,
       fetchedAt,
@@ -126,3 +170,7 @@ export async function searchAvailability(request: SearchRequest): Promise<Availa
   memoryCache.set(key, { expiresAt: now + env.SEATS_AERO_CACHE_TTL_SECONDS * 1000, results });
   return results;
 }
+
+export const __test__ = {
+  normalizeResults
+};
