@@ -1,6 +1,6 @@
 # Reposition
 
-Reposition is a mobile-first crew positioning prototype. It helps a cabin crew member search award-seat availability against a hard arrival deadline, then ranks options by fit instead of making the user scan programs manually.
+Award seat search for airline crew positioning. Reposition is a mobile-first prototype that helps a cabin crew member search award-seat availability against a hard arrival deadline, then ranks options by fit instead of making the user scan programs manually.
 
 ## What is built
 
