@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { rankResults } from "@/lib/ranking";
+import { buildCommuteComparison } from "@/lib/ranking";
 import { searchAvailability, SeatsAeroError } from "@/lib/seats-aero/client";
-import { searchRequestSchema } from "@/lib/search-schema";
+import { commuteSearchSchema } from "@/lib/search-schema";
 
 export async function POST(request: Request) {
-  const parsed = searchRequestSchema.safeParse(await request.json());
+  const parsed = commuteSearchSchema.safeParse(await request.json());
   if (!parsed.success) {
     return NextResponse.json({
       error: "invalid-input",
@@ -15,18 +15,7 @@ export async function POST(request: Request) {
 
   try {
     const availability = await searchAvailability(parsed.data);
-    const ranked = rankResults(availability, parsed.data);
-    const results = ranked.map((result) => {
-      const publicResult: Partial<typeof result> = { ...result };
-      delete publicResult.rawPayload;
-      return publicResult;
-    });
-    return NextResponse.json({
-      source: parsed.data.source,
-      resultCount: results.length,
-      fetchedAt: new Date().toISOString(),
-      results
-    });
+    return NextResponse.json(buildCommuteComparison(parsed.data, availability));
   } catch (error) {
     if (error instanceof SeatsAeroError) {
       return NextResponse.json({

@@ -8,43 +8,100 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  email        String        @unique
-  displayName  String
-  homeBaseIata String
-  createdAt    DateTime      @default(now())
-  savedSearches SavedSearch[]
+  id            String         @id @default(cuid())
+  email         String         @unique
+  displayName   String
+  homeBaseIata  String
+  createdAt     DateTime       @default(now())
+  savedCommutes SavedCommute[]
 }
 
-model SavedSearch {
-  id              String   @id @default(cuid())
+model SavedCommute {
+  id              String         @id @default(cuid())
   userId          String
+  label           String
   originIata      String
   destinationIata String
   departAfter     DateTime
   arriveBefore    DateTime
+  bufferMinutes   Int            @default(90)
   cabin           Cabin
   seatCount       Int
-  label           String
-  createdAt       DateTime @default(now())
+  onloadCategory  OnloadCategory @default(C)
+  seniorityYears  Int            @default(3)
+  createdAt       DateTime       @default(now())
   lastRunAt       DateTime?
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   runs            SearchRun[]
 }
 
 model SearchRun {
-  id             String         @id @default(cuid())
-  savedSearchId  String?
-  requestPayload Json
-  resultCount    Int
-  ranAt          DateTime       @default(now())
-  source         SearchSource
-  savedSearch    SavedSearch?   @relation(fields: [savedSearchId], references: [id], onDelete: SetNull)
-  cachedResults  CachedResult[]
+  id              String            @id @default(cuid())
+  savedCommuteId  String?
+  requestPayload  Json
+  resultCount     Int
+  ranAt           DateTime          @default(now())
+  awardSource     AwardSource
+  savedCommute    SavedCommute?     @relation(fields: [savedCommuteId], references: [id], onDelete: SetNull)
+  standbyOptions  StandbyOption[]
+  staffFareOptions StaffFareOption[]
+  cashOptions     CashOption[]
+  awardResults    AwardResult[]
 }
 
-model CachedResult {
-  id             String    @id @default(cuid())
+model StandbyOption {
+  id                   String        @id @default(cuid())
+  searchRunId          String
+  carrier              String
+  flightNumber         String
+  departsAt            DateTime
+  arrivesAt            DateTime
+  cabin                Cabin
+  clearance            ClearanceBand
+  taxesCents           Int
+  capacity             Int
+  bookedSeats          Int
+  seatsLikelyOpen      Int
+  nonRevsListed        Int
+  adjustedNonRevsAhead Int
+  onloadCategory       OnloadCategory
+  seniorityYears       Int
+  notes                String
+  searchRun            SearchRun     @relation(fields: [searchRunId], references: [id], onDelete: Cascade)
+}
+
+model StaffFareOption {
+  id           String    @id @default(cuid())
+  searchRunId  String
+  carrier      String
+  flightNumber String
+  departsAt    DateTime
+  arrivesAt    DateTime
+  cabin        Cabin
+  amountCents  Int
+  currency     String
+  bookByAt     DateTime?
+  isExpired    Boolean   @default(false)
+  note         String?
+  searchRun    SearchRun @relation(fields: [searchRunId], references: [id], onDelete: Cascade)
+}
+
+model CashOption {
+  id           String    @id @default(cuid())
+  searchRunId  String
+  carrier      String
+  flightNumber String
+  departsAt    DateTime
+  arrivesAt    DateTime
+  cabin        Cabin
+  amountCents  Int
+  currency     String
+  note         String?
+  searchRun    SearchRun @relation(fields: [searchRunId], references: [id], onDelete: Cascade)
+}
+
+model AwardResult {
+  id             String      @id @default(cuid())
   searchRunId    String
   program        String
   carrier        String
@@ -55,8 +112,10 @@ model CachedResult {
   mileageCost    Int
   taxesCents     Int
   seatsRemaining Int
+  source         AwardSource
+  fetchedAt      DateTime
   rawPayload     Json
-  searchRun      SearchRun @relation(fields: [searchRunId], references: [id], onDelete: Cascade)
+  searchRun      SearchRun   @relation(fields: [searchRunId], references: [id], onDelete: Cascade)
 }
 
 enum Cabin {
@@ -66,7 +125,20 @@ enum Cabin {
   first
 }
 
-enum SearchSource {
+enum AwardSource {
   CACHED
   LIVE
+}
+
+enum OnloadCategory {
+  A
+  B
+  C
+  D
+}
+
+enum ClearanceBand {
+  LIKELY
+  UNCERTAIN
+  UNLIKELY
 }

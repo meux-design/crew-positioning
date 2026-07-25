@@ -30,6 +30,26 @@ const config: Config = {
           unavailable: "#9B2C2C",
           info: "#2C6B9E"
         },
+        clearance: {
+          likely: {
+            bg: "var(--color-clearance-likely-bg)",
+            text: "var(--color-clearance-likely-text)"
+          },
+          uncertain: {
+            bg: "var(--color-clearance-uncertain-bg)",
+            text: "var(--color-clearance-uncertain-text)"
+          },
+          unlikely: {
+            bg: "var(--color-clearance-unlikely-bg)",
+            text: "var(--color-clearance-unlikely-text)"
+          }
+        },
+        column: {
+          standby: "var(--color-column-standby)",
+          staff: "var(--color-column-staff)",
+          cash: "var(--color-column-cash)",
+          award: "var(--color-column-award)"
+        },
         surface: {
           page: "var(--color-surface-page)",
           raised: "var(--color-surface-raised)"
