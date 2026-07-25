@@ -7,8 +7,13 @@ const request: SearchRequest = {
   destinationIata: "LHR",
   departAfter: "2026-08-01T00:00:00.000Z",
   arriveBefore: "2026-08-03T23:00:00.000Z",
+  bufferMinutes: 90,
   cabin: "economy",
   seatCount: 1,
+  onloadCategory: "C",
+  seniorityYears: 3,
+  staffFares: [],
+  cashFares: [],
   source: "CACHED"
 };
 

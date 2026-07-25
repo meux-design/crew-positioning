@@ -12,6 +12,16 @@
   --color-border-interactive: #5A6169;
   --color-border-decorative: #CBD1D7;
   --color-focus-ring: #B8541F;
+  --color-clearance-likely-bg: #E8F4EE;
+  --color-clearance-likely-text: #16583C;
+  --color-clearance-uncertain-bg: #FFF4D6;
+  --color-clearance-uncertain-text: #6F4A00;
+  --color-clearance-unlikely-bg: #FCE8E8;
+  --color-clearance-unlikely-text: #842121;
+  --color-column-standby: #2F7D59;
+  --color-column-staff: #6E5AA8;
+  --color-column-cash: #2C6B9E;
+  --color-column-award: #B8541F;
 }
 
 * {

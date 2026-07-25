@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Reposition",
-  description: "Crew positioning award-seat search prototype"
+  description: "Self-funded crew commute comparison prototype"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
